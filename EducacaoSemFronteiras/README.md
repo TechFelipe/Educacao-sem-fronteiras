@@ -1,4 +1,4 @@
-# ENEM+
+# Educacao Sem Fronteiras
 
 Plataforma web para preparação para o ENEM, com foco em prática de redações e acompanhamento do desempenho.
 
@@ -6,16 +6,27 @@ Plataforma web para preparação para o ENEM, com foco em prática de redações
 
 - Python
 - Flask
-- MySQL
+- Flask-SQLAlchemy
+- SQLite
 - HTML
 - CSS
 - JavaScript
 
 ## Arquitetura
 
-Controller → Service → Repository → Procedure → MySQL
+Controller → Service → Repository → Flask-SQLAlchemy → SQLite
 
-## Funcionalidades além do CRUD
+## Banco de dados
+
+O projeto não utiliza mais MySQL nem `mysql-connector-python`.
+
+O banco é um arquivo SQLite localizado em:
+
+`database/enem_plus.db`
+
+As tabelas são criadas automaticamente na primeira execução do `app.py`, e os dados iniciais são inseridos caso ainda não existam.
+
+## Funcionalidades
 
 - Busca de temas por palavra-chave
 - Filtro por dificuldade
@@ -24,15 +35,7 @@ Controller → Service → Repository → Procedure → MySQL
 - Relatório individual
 - Histórico de evolução
 - Consulta das médias das competências
-
-## Procedures
-
-- buscar_temas
-- criar_redacao
-- ranking_alunos
-- relatorio_aluno
-- evolucao_aluno
-- competencia_fraca
+- Cadastro inicial de dados de teste
 
 ## Rotas
 
@@ -51,19 +54,14 @@ GET /api/alunos/<id>/competencia-fraca
 ## Instalação
 
 1. Instale Python 3.
-2. Instale MySQL.
-3. Execute database/enem_plus.sql no MySQL.
-4. Abra config/database.py e altere SUA_SENHA.
-5. No terminal, execute:
+2. No terminal, execute:
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
-6. Execute:
+3. Execute:
 
-python app.py
+`python app.py`
 
-7. Abra http://127.0.0.1:5000
+4. Abra `http://127.0.0.1:5000`
 
-## Observação
-
-A tela de envio de redação cria o registro e deixa a nota inicialmente em 0. A avaliação por competências pode ser adicionada como próxima etapa do projeto.
+Não é necessário instalar MySQL ou executar nenhum arquivo `.sql`.

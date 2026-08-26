@@ -1,32 +1,42 @@
-from config.database import conectar
+from sqlalchemy import func
+from config.database import db
+from models.usuario_model import Usuario
+from models.redacao_model import Redacao
+
 
 class RedacaoRepository:
-
     def criar_redacao(self, usuario_id, tema_id, texto):
-        conexao = conectar()
-        cursor = conexao.cursor(dictionary=True)
-        try:
-            cursor.callproc("criar_redacao", (usuario_id, tema_id, texto))
-            resultado = {}
-            for result in cursor.stored_results():
-                linha = result.fetchone()
-                if linha:
-                    resultado = linha
-            conexao.commit()
-            return resultado
-        finally:
-            cursor.close()
-            conexao.close()
+        redacao = Redacao(
+            usuario_id=usuario_id,
+            tema_id=tema_id,
+            texto=texto,
+            nota_total=0
+        )
+        db.session.add(redacao)
+        db.session.commit()
+        return redacao.to_dict()
 
     def ranking(self):
-        conexao = conectar()
-        cursor = conexao.cursor(dictionary=True)
-        try:
-            cursor.callproc("ranking_alunos")
-            resultados = []
-            for result in cursor.stored_results():
-                resultados = result.fetchall()
-            return resultados
-        finally:
-            cursor.close()
-            conexao.close()
+        resultados = (
+            db.session.query(
+                Usuario.id,
+                Usuario.nome,
+                func.count(Redacao.id).label("quantidade_redacoes"),
+                func.round(func.avg(Redacao.nota_total), 2).label("media")
+            )
+            .join(Redacao, Usuario.id == Redacao.usuario_id)
+            .group_by(Usuario.id, Usuario.nome)
+            .having(func.count(Redacao.id) > 0)
+            .order_by(func.avg(Redacao.nota_total).desc())
+            .all()
+        )
+
+        return [
+            {
+                "id": r.id,
+                "nome": r.nome,
+                "quantidade_redacoes": r.quantidade_redacoes,
+                "media": float(r.media) if r.media is not None else 0,
+            }
+            for r in resultados
+        ]

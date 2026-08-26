@@ -1,2 +1,24 @@
-{% extends 'base.html' %}{% block title %}Cadastrar - Biblioteca digital Estudantil{% endblock %}
-{% block content %}<section class="auth-panel standalone"><div class="auth-form"><h1>Cadastrar</h1><label>Email<input type="email"></label><label>Senha<input type="password"></label><label class="check"><input type="checkbox"> Exibir senha</label><label>Confirmar Senha<input type="password"></label><label class="check"><input type="checkbox"> Exibir senha</label><button class="orange-btn">Cadastrar</button><p>Já possui uma conta?<br><a href="/login">Logue</a> agora!</p></div><div class="auth-art"><div class="big-logo">📖</div></div></section>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Cadastrar - Biblioteca digital Estudantil{% endblock %}
+{% block content %}
+<section class="auth-panel standalone">
+  <div class="auth-form">
+    <h1>Cadastrar</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="auth-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="POST" action="{{ url_for('cadastro') }}" class="auth-form-fields">
+      <label>Email<input name="email" type="email" autocomplete="email" required value="{{ request.form.get('email', '') }}"></label>
+      <label>Senha<input id="cadastroSenha" name="senha" type="password" autocomplete="new-password" required minlength="6"></label>
+      <label class="check"><input type="checkbox" onclick="togglePassword('cadastroSenha')"> Exibir senha</label>
+      <label>Confirmar Senha<input id="confirmarSenha" name="confirmar_senha" type="password" autocomplete="new-password" required minlength="6"></label>
+      <label class="check"><input type="checkbox" onclick="togglePassword('confirmarSenha')"> Exibir senha</label>
+      <button class="orange-btn" type="submit">Cadastrar</button>
+    </form>
+    <p>Já possui uma conta?<br><a href="{{ url_for('login') }}">Logue</a> agora!</p>
+  </div>
+  <div class="auth-art"><div class="big-logo">📖</div></div>
+</section>
+{% endblock %}

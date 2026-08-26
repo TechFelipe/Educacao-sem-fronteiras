@@ -13,7 +13,11 @@
     <span>Biblioteca digital Estudantil</span>
   </a>
   <div class="top-actions">
-    <button class="icon-button" onclick="openLogin()" aria-label="Login">♙</button>
+    {% if usuario_logado %}
+      <button class="user-button" onclick="location.href='/logout'" aria-label="Sair">{{ usuario_logado.nome[:1] | upper }}</button>
+    {% else %}
+      <button class="icon-button" onclick="openLogin()" aria-label="Login">♙</button>
+    {% endif %}
     <button class="icon-button sparkle" onclick="location.href='/assistente'" aria-label="Assistente">✧</button>
     <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menu"><span></span><span></span><span></span></button>
   </div>
@@ -28,30 +32,38 @@
   <a href="/dashboard">Início</a>
   <a href="/temas">Matérias</a>
   <a href="/assistente">Assistente Virtual</a>
-  <a href="/login">Login/Cadastrar</a>
+  {% if usuario_logado %}
+    <a href="/logout">Sair ({{ usuario_logado.nome }})</a>
+  {% else %}
+    <a href="/login">Login</a>
+    <a href="/cadastro">Cadastrar</a>
+  {% endif %}
 </div>
 <div class="menu-backdrop" id="menuBackdrop" onclick="toggleMenu()"></div>
 <main>{% block content %}{% endblock %}</main>
+
 <div class="auth-overlay" id="authOverlay" onclick="closeLogin(event)">
   <div class="auth-panel" onclick="event.stopPropagation()">
     <button class="auth-close" onclick="closeLogin()">×</button>
     <div class="auth-form">
-      <h1 id="authTitle">Fazer login</h1>
-      <label>Email<input id="loginEmail" type="email" placeholder="seuemail@exemplo.com"></label>
-      <label>Senha<input id="loginSenha" type="password"></label>
-      <label class="check"><input type="checkbox" onclick="togglePassword('loginSenha')"> Exibir senha</label>
-      <button class="orange-btn" onclick="fakeLogin()">Entrar</button>
+      <h1>Fazer login</h1>
+      <form method="POST" action="{{ url_for('login') }}" class="auth-form-fields">
+        <label>Email<input name="email" id="loginEmail" type="email" autocomplete="email" required></label>
+        <label>Senha<input name="senha" id="loginSenha" type="password" autocomplete="current-password" required></label>
+        <label class="check"><input type="checkbox" onclick="togglePassword('loginSenha')"> Exibir senha</label>
+        <button class="orange-btn" type="submit">Entrar</button>
+      </form>
       <p>Não possui uma conta?<br><a href="/cadastro">Cadastre-se</a> agora!</p>
     </div>
     <div class="auth-art"><div class="big-logo">📖</div></div>
   </div>
 </div>
+
 <script>
 function toggleMenu(){document.getElementById('sideMenu').classList.toggle('open');document.getElementById('menuBackdrop').classList.toggle('show')}
 function openLogin(){document.getElementById('authOverlay').classList.add('show')}
 function closeLogin(e){if(!e || e.target===document.getElementById('authOverlay'))document.getElementById('authOverlay').classList.remove('show')}
 function togglePassword(id){const el=document.getElementById(id);el.type=el.type==='password'?'text':'password'}
-function fakeLogin(){alert('Login demonstrativo. Conecte este formulário ao seu sistema de usuários quando o banco estiver configurado.')}
 </script>
 {% block scripts %}{% endblock %}
 </body>
