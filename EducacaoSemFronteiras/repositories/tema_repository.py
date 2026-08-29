@@ -1,22 +1,41 @@
-from sqlalchemy import or_
-from config.database import db
-from models.tema_model import Tema
-
+from config.database import get_connection
 
 class TemaRepository:
-    def buscar_temas(self, termo=None, dificuldade=None):
-        query = Tema.query
+    # ... seus outros métodos ...
 
-        if termo:
-            termo_like = f"%{termo}%"
-            query = query.filter(
-                or_(
-                    Tema.titulo.ilike(termo_like),
-                    Tema.descricao.ilike(termo_like)
-                )
+    def buscar_por_id(self, tema_id):
+
+        conn = get_connection()
+
+        try:
+            cursor = conn.cursor()
+
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    titulo,
+                    descricao,
+                    dificuldade,
+                    criado_em
+                FROM temas
+                WHERE id = ?
+                """,
+                (tema_id,)
             )
 
-        if dificuldade:
-            query = query.filter(Tema.dificuldade == dificuldade)
+            tema = cursor.fetchone()
 
-        return [tema.to_dict() for tema in query.order_by(Tema.criado_em.desc()).all()]
+            if tema is None:
+                return None
+
+            return {
+                "id": tema["id"],
+                "titulo": tema["titulo"],
+                "descricao": tema["descricao"],
+                "dificuldade": tema["dificuldade"],
+                "criado_em": tema["criado_em"]
+            }
+
+        finally:
+            conn.close()

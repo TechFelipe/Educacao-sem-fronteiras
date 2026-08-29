@@ -1,19 +1,30 @@
-from config.database import db
+class NotaCompetencia:
 
+    def __init__(
+        self,
+        id=None,
+        redacao_id=None,
+        competencia1=0,
+        competencia2=0,
+        competencia3=0,
+        competencia4=0,
+        competencia5=0
+    ):
+        self.id = id
+        self.redacao_id = redacao_id
+        self.competencia1 = competencia1
+        self.competencia2 = competencia2
+        self.competencia3 = competencia3
+        self.competencia4 = competencia4
+        self.competencia5 = competencia5
 
-class NotaCompetencia(db.Model):
-    __tablename__ = "notas_competencias"
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    redacao_id = db.Column(
-        db.Integer,
-        db.ForeignKey("redacoes.id", ondelete="CASCADE"),
-        nullable=False
-    )
-    competencia1 = db.Column(db.Integer, default=0, nullable=False)
-    competencia2 = db.Column(db.Integer, default=0, nullable=False)
-    competencia3 = db.Column(db.Integer, default=0, nullable=False)
-    competencia4 = db.Column(db.Integer, default=0, nullable=False)
-    competencia5 = db.Column(db.Integer, default=0, nullable=False)
-
-    redacao = db.relationship("Redacao", back_populates="competencias")
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "redacao_id": self.redacao_id,
+            "competencia1": self.competencia1,
+            "competencia2": self.competencia2,
+            "competencia3": self.competencia3,
+            "competencia4": self.competencia4,
+            "competencia5": self.competencia5,
+        }

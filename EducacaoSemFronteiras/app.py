@@ -1,112 +1,173 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, session, flash
-from config.database import init_db, DB_PATH
+from controllers.usuario_controller import usuario_bp
+
+from flask import (
+    Flask,
+    jsonify,
+    send_from_directory,
+    redirect,
+)
+
+from pathlib import Path
+
+from config.database import init_db
+
 from controllers.tema_controller import tema_bp
 from controllers.redacao_controller import redacao_bp
 from controllers.relatorio_controller import relatorio_bp
-from services.auth_service import AuthService
+from controllers.usuario_controller import usuario_bp
+
 
 app = Flask(__name__)
+
 app.config["SECRET_KEY"] = "enem-plus-chave-local-2026"
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH.as_posix()}"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+
+# ============================================================
+# FRONTEND
+# ============================================================
+
+FRONTEND_DIR = Path(app.root_path) / "frontend"
+
+
+# ============================================================
+# BANCO DE DADOS
+# ============================================================
 
 init_db(app)
 
-app.register_blueprint(tema_bp, url_prefix="/api/temas")
-app.register_blueprint(redacao_bp, url_prefix="/api/redacoes")
-app.register_blueprint(relatorio_bp, url_prefix="/api/alunos")
+
+# ============================================================
+# BLUEPRINTS / APIs
+# ============================================================
+
+app.register_blueprint(
+    tema_bp,
+    url_prefix="/api/temas"
+)
+
+app.register_blueprint(
+    redacao_bp,
+    url_prefix="/api/redacoes"
+)
+
+app.register_blueprint(
+    relatorio_bp,
+    url_prefix="/api/alunos"
+)
+
+app.register_blueprint(
+    usuario_bp,
+    url_prefix="/api"
+)
 
 
-@app.context_processor
-def inject_usuario():
-    return {"usuario_logado": session.get("usuario")}
-
+# ============================================================
+# FRONTEND / PÁGINAS
+# ============================================================
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "index.html"
+    )
 
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "dashboard.html"
+    )
 
 
 @app.route("/temas")
 def temas():
-    return render_template("temas.html")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "temas.html"
+    )
 
 
 @app.route("/redacao")
 def redacao():
-    return render_template("redacao.html")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "redacao.html"
+    )
 
 
 @app.route("/desempenho")
 def desempenho():
-    return render_template("desempenho.html")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "desempenho.html"
+    )
 
 
 @app.route("/ranking")
 def ranking():
-    return render_template("ranking.html")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "ranking.html"
+    )
 
 
 @app.route("/assistente")
 def assistente():
-    return render_template("assistente.html")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "assistente.html"
+    )
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login")
 def login():
-    if request.method == "POST":
-        usuario = AuthService.autenticar(
-            request.form.get("email"),
-            request.form.get("senha"),
-        )
-        if usuario:
-            session["usuario"] = {
-                "id": usuario.id,
-                "nome": usuario.nome,
-                "email": usuario.email,
-            }
-            flash("Login realizado com sucesso!", "success")
-            return redirect(url_for("dashboard"))
-
-        flash("E-mail ou senha incorretos.", "error")
-        return redirect(url_for("login"))
-
-    return render_template("login.html")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "login.html"
+    )
 
 
-@app.route("/cadastro", methods=["GET", "POST"])
+@app.route("/cadastro")
 def cadastro():
-    if request.method == "POST":
-        sucesso, mensagem = AuthService.cadastrar(
-            request.form.get("email"),
-            request.form.get("senha"),
-            request.form.get("confirmar_senha"),
-        )
-        flash(mensagem, "success" if sucesso else "error")
+    return send_from_directory(
+        str(FRONTEND_DIR),
+        "cadastro.html"
+    )
 
-        if sucesso:
-            return redirect(url_for("login"))
-        return render_template("cadastro.html")
 
-    return render_template("cadastro.html")
-
+# ============================================================
+# LOGOUT
+# ============================================================
 
 @app.route("/logout")
 def logout():
-    session.pop("usuario", None)
-    flash("Você saiu da conta.", "success")
-    return redirect(url_for("dashboard"))
 
+    from flask import session
+
+    session.pop("usuario", None)
+
+    return redirect("/dashboard")
+
+
+# ============================================================
+# ERRO 404
+# ============================================================
 
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({"erro": "Rota não encontrada"}), 404
 
+    return jsonify({
+        "erro": "Rota não encontrada"
+    }), 404
+
+
+# ============================================================
+# EXECUÇÃO
+# ============================================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        debug=True
+    )

@@ -1,67 +1,35 @@
-# Educacao Sem Fronteiras
+# EducacaoSemFronteiras — HTML puro + JavaScript + Flask-SQLAlchemy
 
-Plataforma web para preparação para o ENEM, com foco em prática de redações e acompanhamento do desempenho.
+Esta versão remove o Jinja do frontend. Os arquivos HTML não usam `{% ... %}` nem `{{ ... }}`.
 
-## Tecnologias
+## Como funciona
 
-- Python
-- Flask
-- Flask-SQLAlchemy
-- SQLite
-- HTML
-- CSS
-- JavaScript
+O navegador usa `fetch()` para consultar as APIs do Flask. O Flask usa Flask-SQLAlchemy para acessar `database/enem_plus.db`.
 
-## Arquitetura
+- `GET /api/usuario` — informa se existe usuário logado e devolve seus dados.
+- `POST /api/auth/login` — autentica e cria a sessão.
+- `POST /api/auth/cadastro` — cadastra usuário no SQLite.
+- `GET /api/temas/buscar?termo=...` — consulta temas no banco.
+- `POST /api/redacoes` — salva a redação.
+- `GET /api/redacoes/temas` — consulta Tema.
+- `GET /api/redacoes/temas` — consulta Dificuldade.
+-  FUNC /static/js/redacoes/temas` — Atualiza a pagina redacao.html
+- `GET /api/redacoes/ranking` — consulta ranking.
+- `GET /api/alunos/<id>/relatorio` — relatório.
+- `GET /api/alunos/<id>/evolucao` — evolução.
+- `GET /api/alunos/<id>/competencia-fraca` — competências.
 
-Controller → Service → Repository → Flask-SQLAlchemy → SQLite
+## Executar
 
-## Banco de dados
+Na pasta `EducacaoSemFronteiras`:
 
-O projeto não utiliza mais MySQL nem `mysql-connector-python`.
+```bash
+pip install -r requirements.txt
+python app.py
+```
 
-O banco é um arquivo SQLite localizado em:
+O banco usado é `database/enem_plus.db`.
 
-`database/enem_plus.db`
-
-As tabelas são criadas automaticamente na primeira execução do `app.py`, e os dados iniciais são inseridos caso ainda não existam.
-
-## Funcionalidades
-
-- Busca de temas por palavra-chave
-- Filtro por dificuldade
-- Ordenação dos resultados
-- Ranking de estudantes
-- Relatório individual
-- Histórico de evolução
-- Consulta das médias das competências
-- Cadastro inicial de dados de teste
-
-## Rotas
-
-GET /api/temas/buscar?termo=educacao&dificuldade=Media
-
-POST /api/redacoes
-
-GET /api/redacoes/ranking
-
-GET /api/alunos/<id>/relatorio
-
-GET /api/alunos/<id>/evolucao
-
-GET /api/alunos/<id>/competencia-fraca
-
-## Instalação
-
-1. Instale Python 3.
-2. No terminal, execute:
-
-`pip install -r requirements.txt`
-
-3. Execute:
-
-`python app.py`
-
-4. Abra `http://127.0.0.1:5000`
-
-Não é necessário instalar MySQL ou executar nenhum arquivo `.sql`.
+Usuário de teste criado automaticamente:
+- e-mail: `aluno@teste.com`
+- senha: `123456`

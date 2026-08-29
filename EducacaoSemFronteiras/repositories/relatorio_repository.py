@@ -1,64 +1,209 @@
-from sqlalchemy import func
-from config.database import db
-from models.usuario_model import Usuario
-from models.redacao_model import Redacao
-from models.tema_model import Tema
-from models.nota_competencia_model import NotaCompetencia
+from config.database import get_connection
 
 
 class RelatorioRepository:
+
     def relatorio_aluno(self, usuario_id):
-        usuario = db.session.get(Usuario, usuario_id)
-        if usuario is None:
-            return {}
 
-        total = Redacao.query.filter_by(usuario_id=usuario_id).count()
-        media = db.session.query(func.avg(Redacao.nota_total)).filter_by(usuario_id=usuario_id).scalar()
-        melhor = db.session.query(func.max(Redacao.nota_total)).filter_by(usuario_id=usuario_id).scalar()
-        menor = db.session.query(func.min(Redacao.nota_total)).filter_by(usuario_id=usuario_id).scalar()
+        conn = get_connection()
 
-        return {
-            "nome": usuario.nome,
-            "total_redacoes": total,
-            "media": round(float(media), 2) if media is not None else 0,
-            "melhor_nota": int(melhor) if melhor is not None else 0,
-            "menor_nota": int(menor) if menor is not None else 0,
-        }
+        try:
+            cursor = conn.cursor()
+
+            # =================================================
+            # USUARIO
+            # =================================================
+
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    nome
+                FROM usuarios
+                WHERE id = ?
+                LIMIT 1
+                """,
+                (usuario_id,)
+            )
+
+            usuario = cursor.fetchone()
+
+            if usuario is None:
+                return {}
+
+            # =================================================
+            # TOTAL DE REDAÇÕES
+            # =================================================
+
+            cursor.execute(
+                """
+                SELECT COUNT(*) AS total
+                FROM redacoes
+                WHERE usuario_id = ?
+                """,
+                (usuario_id,)
+            )
+
+            total = cursor.fetchone()["total"]
+
+            # =================================================
+            # MÉDIA
+            # =================================================
+
+            cursor.execute(
+                """
+                SELECT AVG(nota_total) AS media
+                FROM redacoes
+                WHERE usuario_id = ?
+                """,
+                (usuario_id,)
+            )
+
+            media = cursor.fetchone()["media"]
+
+            # =================================================
+            # MELHOR NOTA
+            # =================================================
+
+            cursor.execute(
+                """
+                SELECT MAX(nota_total) AS melhor
+                FROM redacoes
+                WHERE usuario_id = ?
+                """,
+                (usuario_id,)
+            )
+
+            melhor = cursor.fetchone()["melhor"]
+
+            # =================================================
+            # MENOR NOTA
+            # =================================================
+
+            cursor.execute(
+                """
+                SELECT MIN(nota_total) AS menor
+                FROM redacoes
+                WHERE usuario_id = ?
+                """,
+                (usuario_id,)
+            )
+
+            menor = cursor.fetchone()["menor"]
+
+            return {
+                "nome": usuario["nome"],
+                "total_redacoes": total,
+                "media": (
+                    round(float(media), 2)
+                    if media is not None
+                    else 0
+                ),
+                "melhor_nota": (
+                    int(melhor)
+                    if melhor is not None
+                    else 0
+                ),
+                "menor_nota": (
+                    int(menor)
+                    if menor is not None
+                    else 0
+                ),
+            }
+
+        finally:
+            conn.close()
 
     def evolucao(self, usuario_id):
-        redacoes = (
-            db.session.query(Redacao, Tema)
-            .join(Tema, Redacao.tema_id == Tema.id)
-            .filter(Redacao.usuario_id == usuario_id)
-            .order_by(Redacao.data_envio.asc())
-            .all()
-        )
 
-        return [
-            {
-                "id": redacao.id,
-                "tema": tema.titulo,
-                "nota_total": redacao.nota_total,
-                "data_envio": redacao.data_envio.isoformat() if redacao.data_envio else None,
-            }
-            for redacao, tema in redacoes
-        ]
+        conn = get_connection()
+
+        try:
+            cursor = conn.cursor()
+
+            cursor.execute(
+                """
+                SELECT
+                    r.id,
+                    t.titulo AS tema,
+                    r.nota_total,
+                    r.data_envio
+                FROM redacoes r
+                INNER JOIN temas t
+                    ON r.tema_id = t.id
+                WHERE r.usuario_id = ?
+                ORDER BY r.data_envio ASC
+                """,
+                (usuario_id,)
+            )
+
+            redacoes = cursor.fetchall()
+
+            return [
+                {
+                    "id": redacao["id"],
+                    "tema": redacao["tema"],
+                    "nota_total": redacao["nota_total"],
+                    "data_envio": redacao["data_envio"],
+                }
+                for redacao in redacoes
+            ]
+
+        finally:
+            conn.close()
 
     def competencia_fraca(self, usuario_id):
-        valores = (
-            db.session.query(
-                func.avg(NotaCompetencia.competencia1),
-                func.avg(NotaCompetencia.competencia2),
-                func.avg(NotaCompetencia.competencia3),
-                func.avg(NotaCompetencia.competencia4),
-                func.avg(NotaCompetencia.competencia5),
-            )
-            .join(Redacao, NotaCompetencia.redacao_id == Redacao.id)
-            .filter(Redacao.usuario_id == usuario_id)
-            .one()
-        )
 
-        return {
-            f"competencia{i}": round(float(valor), 2) if valor is not None else 0
-            for i, valor in enumerate(valores, start=1)
-        }
+        conn = get_connection()
+
+        try:
+            cursor = conn.cursor()
+
+            cursor.execute(
+                """
+                SELECT
+                    AVG(nc.competencia1) AS competencia1,
+                    AVG(nc.competencia2) AS competencia2,
+                    AVG(nc.competencia3) AS competencia3,
+                    AVG(nc.competencia4) AS competencia4,
+                    AVG(nc.competencia5) AS competencia5
+                FROM notas_competencias nc
+                INNER JOIN redacoes r
+                    ON nc.redacao_id = r.id
+                WHERE r.usuario_id = ?
+                """,
+                (usuario_id,)
+            )
+
+            valores = cursor.fetchone()
+
+            return {
+                "competencia1": (
+                    round(float(valores["competencia1"]), 2)
+                    if valores["competencia1"] is not None
+                    else 0
+                ),
+                "competencia2": (
+                    round(float(valores["competencia2"]), 2)
+                    if valores["competencia2"] is not None
+                    else 0
+                ),
+                "competencia3": (
+                    round(float(valores["competencia3"]), 2)
+                    if valores["competencia3"] is not None
+                    else 0
+                ),
+                "competencia4": (
+                    round(float(valores["competencia4"]), 2)
+                    if valores["competencia4"] is not None
+                    else 0
+                ),
+                "competencia5": (
+                    round(float(valores["competencia5"]), 2)
+                    if valores["competencia5"] is not None
+                    else 0
+                ),
+            }
+
+        finally:
+            conn.close()

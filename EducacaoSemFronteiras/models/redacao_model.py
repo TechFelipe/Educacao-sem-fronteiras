@@ -1,33 +1,20 @@
-from config.database import db
-from datetime import datetime
+class Redacao:
 
-
-class Redacao(db.Model):
-    __tablename__ = "redacoes"
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    usuario_id = db.Column(
-        db.Integer,
-        db.ForeignKey("usuarios.id", ondelete="CASCADE"),
-        nullable=False
-    )
-    tema_id = db.Column(
-        db.Integer,
-        db.ForeignKey("temas.id"),
-        nullable=False
-    )
-    texto = db.Column(db.Text, nullable=False)
-    nota_total = db.Column(db.Integer, default=0, nullable=False)
-    data_envio = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
-    usuario = db.relationship("Usuario", back_populates="redacoes")
-    tema = db.relationship("Tema", back_populates="redacoes")
-    competencias = db.relationship(
-        "NotaCompetencia",
-        back_populates="redacao",
-        uselist=False,
-        cascade="all, delete-orphan"
-    )
+    def __init__(
+        self,
+        id=None,
+        usuario_id=None,
+        tema_id=None,
+        texto=None,
+        nota_total=0,
+        data_envio=None
+    ):
+        self.id = id
+        self.usuario_id = usuario_id
+        self.tema_id = tema_id
+        self.texto = texto
+        self.nota_total = nota_total
+        self.data_envio = data_envio
 
     def to_dict(self):
         return {
@@ -36,5 +23,5 @@ class Redacao(db.Model):
             "tema_id": self.tema_id,
             "texto": self.texto,
             "nota_total": self.nota_total,
-            "data_envio": self.data_envio.isoformat() if self.data_envio else None,
+            "data_envio": self.data_envio,
         }

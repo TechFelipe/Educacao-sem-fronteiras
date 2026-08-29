@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redação - Biblioteca digital Estudantil</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/common.js" defer></script>
+    <script src="/static/js/redacao.js" defer></script>
+</head>
+<body>
+    <div id="site-header"></div>
+    <main><section class="form-page"><h1>Enviar redação</h1>
+    <div class="form-card"><label>Seu ID<input id="usuario" type="number" placeholder="ID do usuário"></label>
+      <label>
+    ID do tema
+    <input
+        id="tema"
+        type="number"
+        placeholder="ID do tema"
+        oninput="verificarTema()"
+    >
+</label>
+    <div id="mutavel">
+        <label for="">Tema da redação</label>
+        <label for="">Nivel de dificuldade</label>
+    </div>
+    <label>Redação<textarea id="texto" rows="15" placeholder="Digite sua redação aqui..."></textarea></label>
+    <button class="orange-btn" onclick="enviar()">Enviar redação</button><p id="msg"></p></div></section></main>
+</body>
+</html>

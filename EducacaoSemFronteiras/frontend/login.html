@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazer login - Biblioteca digital Estudantil</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/common.js" defer></script>
+</head>
+<body>
+    <div id="site-header"></div>
+    <main><section class="auth-panel standalone">
+    <div class="auth-form"><h1>Fazer login</h1>
+    <form id="loginForm" class="auth-form-fields">
+    <label>Email<input id="email" name="email" type="email" autocomplete="email" required></label>
+    <label>Senha<input id="senha" name="senha" type="password" autocomplete="current-password" required></label>
+    <label class="check"><input type="checkbox" onclick="togglePassword('senha')"> Exibir senha</label>
+    <button class="orange-btn" type="submit">Entrar</button>
+    <div id="msg"></div>
+</form>
+    <p>Não possui uma conta?<br><a href="/cadastro">Cadastre-se</a> agora!</p>
+</div><div class="auth-art"><div class="big-logo">📖</div></div>
+</section></main>
+    <script>
+    document.getElementById("loginForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        const msg = document.getElementById("msg");
+        const dados = Object.fromEntries(new FormData(e.currentTarget));
+        const res = await fetch("/api/auth/login", {method:"POST", headers:{"Content-Type":"application/json"}, credentials:"same-origin", body:JSON.stringify(dados)});
+        const json = await res.json();
+        if (res.ok) location.href = "/dashboard";
+        else { msg.textContent = json.erro || "Erro ao fazer login."; msg.className = "auth-message error"; }
+    });
+
+</script>
+</body>
+</html>
