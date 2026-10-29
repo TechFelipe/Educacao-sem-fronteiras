@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <!-- Metadados e estilos compartilhados com as demais páginas do projeto. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciar temas - Educação sem Fronteiras</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="/static/js/common.js" defer></script>
+  <script src="/static/js/gerenciar_temas.js" defer></script>
+</head>
+
+<body>
+  <iframe class="header-frame" src="/cabecalho" title="Cabeçalho e navegação" scrolling="no" loading="eager"></iframe>
+  <main>
+    <section class="form-page">
+      <h1>Gerenciar temas</h1>
+      <!-- O mesmo formulário permite cadastrar um tema novo ou editar o tema selecionado. -->
+      <div class="form-card">
+        <input id="temaId" type="hidden">
+        <label>Título<input id="titulo" maxlength="255" required></label>
+        <label>Descrição<textarea id="descricao" rows="3"></textarea></label>
+        <label>Dificuldade<select id="dificuldade">
+            <option value="Facil">Fácil</option>
+            <option value="Media">Média</option>
+            <option value="Dificil">Difícil</option>
+          </select></label>
+        <button class="orange-btn" id="salvar-tema" type="button">Salvar tema</button>
+        <button type="button" id="limpar-formulario">Limpar</button>
+        <p id="mensagem" role="status"></p>
+      </div>
+      <!-- A lista é carregada pela API; os botões executam edição e exclusão reais. -->
+      <h2>Temas cadastrados</h2>
+      <div id="listaTemas" class="cards">Carregando temas...</div>
+    </section>
+  </main>
+</body>
+
+</html>

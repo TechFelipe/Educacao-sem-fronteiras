@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matérias - Biblioteca digital Estudantil</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/temas.css">
+    <!-- Carrega o cabeçalho, menu lateral e área de usuário compartilhados pelo site. -->
+    <script src="/static/js/common.js" defer></script>
+    <script src="/static/js/temas.js" defer></script>
+</head>
+
+<body>
+    <iframe class="header-frame" src="/cabecalho" title="Cabeçalho e navegação" scrolling="no" loading="eager"></iframe>
+    <main class="page">
+        <h1>Matérias</h1>
+        <p>Pesquise uma matéria ou selecione uma das opções para ver os PDFs disponíveis.</p>
+
+        <div class="materias-search">
+            <input id="termo" class="search" type="search"
+                placeholder="Pesquisar matéria, por exemplo Matemática ou Português" aria-label="Pesquisar matéria">
+            <button id="botao-buscar" class="search-icon" type="button">⌕</button>
+        </div>
+
+        <!-- Os botões são criados dinamicamente com os nomes das tabelas de materias.sqlite. -->
+        <div class="materias-grid" id="subjects" aria-label="Matérias disponíveis">
+            <!-- O JavaScript preenche este espaço a partir da API Flask. -->
+        </div>
+
+        <!-- A lista começa vazia: os PDFs só aparecem depois de selecionar uma matéria ou pesquisar. -->
+        <p id="materias-status" class="materias-status" role="status" aria-live="polite">Selecione uma matéria ou
+            pesquise para visualizar os PDFs.</p>
+        <section id="resultado-materias" class="materiais-lista" aria-label="Materiais encontrados"></section>
+    </main>
+
+
+</body>
+
+</html>

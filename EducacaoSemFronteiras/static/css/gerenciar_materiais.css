@@ -1,0 +1,38 @@
+.material-admin-page h1 { margin-bottom: 8px; }
+.admin-notice, .admin-status { margin: 14px 0; padding: 12px 14px; border-radius: 8px; background: #fff4df; border: 1px solid #efc16b; }
+.admin-notice a { font-weight: 700; margin-left: 6px; }
+.admin-panel { margin: 22px 0 32px; padding: 22px; border: 1px solid #ddd; border-radius: 14px; box-shadow: 0 2px 7px #0000000a; }
+.admin-panel h2, .admin-library h2 { margin: 0 0 15px; font-size: 24px; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px; }
+.form-grid label { display: flex; flex-direction: column; gap: 7px; font-weight: 700; }
+.form-grid input, .form-grid select, #filtro-materiais { width: 100%; min-width: 0; min-height: 42px; padding: 9px 11px; border: 1px solid #aaa; border-radius: 7px; background: #fff; font: inherit; font-weight: 400; }
+.form-grid input[type="file"] { padding: 7px; }
+.form-grid small { color: #555; font-weight: 400; }
+.admin-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.admin-button, .admin-card-button { border: 1px solid #a32629; border-radius: 8px; padding: 10px 14px; background: #fff; color: #7e1c20; font: inherit; font-weight: 700; cursor: pointer; }
+.admin-button.primary { border-color: #e87500; background: #f28c28; color: #fff; }
+.admin-button.muted { border-color: #aaa; color: #333; }
+.admin-button:disabled, .admin-card-button:disabled { cursor: not-allowed; opacity: .45; }
+.form-help { margin: 14px 0 0; color: #555; line-height: 1.45; }
+.admin-library-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 12px; }
+.admin-library-heading p { margin: 0; color: #555; }
+#filtro-materiais { max-width: 360px; }
+.admin-material-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+.admin-material-card { min-width: 0; padding: 17px; border: 1px solid #ddd; border-radius: 12px; background: #fff; box-shadow: 0 2px 6px #00000008; }
+.admin-material-card h3 { margin: 0 0 10px; overflow-wrap: anywhere; font-size: 19px; }
+.admin-material-card p { margin: 6px 0; line-height: 1.4; overflow-wrap: anywhere; }
+.admin-material-meta { color: #444; font-size: 14px; }
+.admin-material-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.admin-material-actions a { display: inline-block; border-radius: 7px; padding: 9px 12px; background: #f28c28; color: #fff; text-decoration: none; font-weight: 700; }
+.admin-material-actions a.download-link { background: #fff; border: 1px solid #ccc; color: #333; }
+.admin-card-button.delete { border-color: #a32629; background: #a32629; color: #fff; }
+.admin-card-button.edit { border-color: #e87500; background: #be6103; color: #fff; }
+.empty-state { margin: 20px 0; padding: 18px; text-align: center; background: #f7f7f7; border-radius: 10px; }
+@media (max-width: 700px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .admin-panel { padding: 15px; }
+    .admin-library-heading { align-items: stretch; flex-direction: column; }
+    #filtro-materiais { max-width: none; }
+}
+
+.admin-status.status-error { border-color: #a32629; background: #fff0f0; color: #7e1c20; }

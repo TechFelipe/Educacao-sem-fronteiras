@@ -1,0 +1,3 @@
+fetch("/api/redacoes/ranking").then(r=>r.json()).then(d=>{
+    document.getElementById("ranking").innerHTML = d.map((x,i)=>`<div class="rank-card"><strong>#${i+1} — ${escapeHtml(x.nome)}</strong><span>Redações: ${x.quantidade_redacoes} · Média: <b>${x.media}</b></span></div>`).join("") || '<div class="notice">Ainda não há dados no ranking.</div>';
+}).catch(()=>document.getElementById("ranking").innerHTML='<div class="notice">Não foi possível carregar o ranking.</div>');

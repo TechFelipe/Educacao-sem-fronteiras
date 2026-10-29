@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar PDFs - Biblioteca digital Estudantil</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/gerenciar_materiais.css">
+    <script src="/static/js/common.js" defer></script>
+    <script src="/static/js/gerenciar_materiais.js" defer></script>
+</head>
+<body>
+    <iframe class="header-frame" src="/cabecalho" title="Cabeçalho e navegação" scrolling="no" loading="eager"></iframe>
+    <main class="page material-admin-page">
+        <h1>Gerenciar PDFs</h1>
+        <p>Adicione materiais, corrija o título ou o nível de ensino, substitua um arquivo ou exclua um PDF.</p>
+
+        <p id="aviso-login" class="admin-notice" role="status" hidden>
+            Entre na sua conta para adicionar, editar, substituir ou excluir PDFs.
+            <a href="/login">Fazer login</a>
+        </p>
+        <p id="admin-status" class="admin-status" role="status" aria-live="polite">Carregando materiais...</p>
+
+        <section class="admin-panel" aria-labelledby="form-title">
+            <h2 id="form-title">Adicionar PDF</h2>
+            <form id="form-material" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <label for="material-titulo">Título do material
+                        <input id="material-titulo" name="titulo" type="text" maxlength="200" required placeholder="Ex.: Apostila de Matemática">
+                    </label>
+                    <label for="material-materia">Matéria
+                        <input id="material-materia" name="materia" type="text" maxlength="100" list="lista-materias" required placeholder="Ex.: Matemática">
+                        <datalist id="lista-materias"></datalist>
+                    </label>
+                    <label for="material-nivel">Nível de ensino
+                        <select id="material-nivel" name="nivel" required>
+                            <option value="">Selecione o nível</option>
+                            <option value="Ensino Fundamental">Ensino Fundamental</option>
+                            <option value="Ensino Médio">Ensino Médio</option>
+                            <option value="Faculdade">Faculdade</option>
+                        </select>
+                    </label>
+                    <label for="material-arquivo">Arquivo PDF
+                        <input id="material-arquivo" name="arquivo" type="file" accept="application/pdf,.pdf">
+                        <small>Arquivo PDF de até 50 MB.</small>
+                    </label>
+                </div>
+                <div class="admin-actions">
+                    <button id="adicionar-material" class="admin-button primary" type="submit">Adicionar PDF</button>
+                    <button id="salvar-edicao" class="admin-button" type="button" disabled>Salvar edição</button>
+                    <button id="substituir-pdf" class="admin-button" type="button" disabled>Substituir arquivo</button>
+                    <button id="cancelar-edicao" class="admin-button muted" type="button" disabled>Cancelar edição</button>
+                </div>
+                <p class="form-help">Para editar um PDF existente, clique em “Editar” no material abaixo. Para substituir o arquivo, selecione o novo PDF e clique em “Substituir arquivo”.</p>
+            </form>
+        </section>
+
+        <section class="admin-library" aria-labelledby="library-title">
+            <div class="admin-library-heading">
+                <div>
+                    <h2 id="library-title">PDFs cadastrados</h2>
+                    <p>Os arquivos antigos do banco também aparecem aqui.</p>
+                </div>
+                <input id="filtro-materiais" type="search" placeholder="Filtrar por título ou matéria" aria-label="Filtrar PDFs">
+            </div>
+            <div id="lista-materiais" class="admin-material-grid"></div>
+            <p id="lista-vazia" class="empty-state" hidden>Nenhum PDF encontrado.</p>
+        </section>
+    </main>
+</body>
+</html>
