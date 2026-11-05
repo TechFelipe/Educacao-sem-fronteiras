@@ -84,7 +84,8 @@ class RedacaoRepository:
                     u.id,
                     u.nome,
                     COUNT(r.id) AS quantidade_redacoes,
-                    ROUND(AVG(r.nota_total), 2) AS media
+                    ROUND(AVG(r.nota_total), 2) AS media,
+                    MAX(r.nota_total) AS melhor_nota
                 FROM usuarios u
                 INNER JOIN redacoes r
                     ON u.id = r.usuario_id
@@ -92,7 +93,13 @@ class RedacaoRepository:
                     u.id,
                     u.nome
                 HAVING COUNT(r.id) > 0
-                ORDER BY AVG(r.nota_total) DESC
+                -- Primeiro: maior média das notas. Em caso de empate,
+                -- vence quem enviou mais redações. O nome/ID estabiliza a ordem.
+                ORDER BY
+                    AVG(r.nota_total) DESC,
+                    COUNT(r.id) DESC,
+                    u.nome COLLATE NOCASE ASC,
+                    u.id ASC
                 """
             )
 
@@ -103,6 +110,11 @@ class RedacaoRepository:
                     "id": resultado["id"],
                     "nome": resultado["nome"],
                     "quantidade_redacoes": resultado["quantidade_redacoes"],
+                    "melhor_nota": (
+                        int(resultado["melhor_nota"])
+                        if resultado["melhor_nota"] is not None
+                        else 0
+                    ),
                     "media": (
                         float(resultado["media"])
                         if resultado["media"] is not None

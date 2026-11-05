@@ -142,6 +142,119 @@ class PdfRepository:
             for linha in linhas
         }
 
+    @staticmethod
+    def _validar_nome_materia(nome: str) -> str:
+        nome = str(nome or "").strip()
+        if not nome or len(nome) > 100:
+            raise ValueError("Informe um nome de matéria com até 100 caracteres.")
+        if any(ord(c) < 32 for c in nome) or not any(c.isalnum() for c in nome):
+            raise ValueError("O nome da matéria contém caracteres inválidos.")
+        return nome
+
+    def listar_materias_administracao(self) -> list[dict[str, Any]]:
+        with self._conexao() as conexao:
+            resultado = []
+            for tabela in self._nomes_tabelas_legacy(conexao):
+                tabela_sql = _quote_identifier(tabela)
+                colunas = [str(c["name"]) for c in conexao.execute(f"PRAGMA table_info({tabela_sql})").fetchall()]
+                try:
+                    registros = conexao.execute(f"SELECT rowid, * FROM {tabela_sql}").fetchall()
+                except sqlite3.Error:
+                    registros = []
+                quantidade = sum(
+                    1 for registro in registros
+                    for indice, _ in enumerate(colunas, start=1)
+                    if self._decodificar_pdf(registro[indice]) is not None
+                )
+                resultado.append({"nome": tabela, "pdfs": quantidade, "origem": "tabela"})
+            gerenciados = conexao.execute(
+                f"SELECT materia, COUNT(*) AS total FROM {TABELA_GERENCIADOS} GROUP BY materia"
+            ).fetchall()
+            por_nome = {item["nome"].casefold(): item for item in resultado}
+            for linha in gerenciados:
+                chave = linha["materia"].casefold()
+                if chave in por_nome:
+                    por_nome[chave]["pdfs"] += int(linha["total"])
+                else:
+                    resultado.append({"nome": linha["materia"], "pdfs": int(linha["total"]), "origem": "gerenciados"})
+            return sorted(resultado, key=lambda item: item["nome"].casefold())
+
+    def criar_materia(self, nome: str) -> dict[str, Any]:
+        nome = self._validar_nome_materia(nome)
+        with self._conexao() as conexao:
+            existentes = self._nomes_tabelas_legacy(conexao)
+            if any(item.casefold() == nome.casefold() for item in existentes):
+                raise ValueError("Já existe uma matéria com esse nome.")
+            conexao.execute(f"CREATE TABLE {_quote_identifier(nome)} ("
+                            '`Ensino Fundamental` ANY, `Ensino Medio` ANY, `Faculdade` ANY) STRICT')
+            conexao.commit()
+        return {"nome": nome, "pdfs": 0}
+
+    def renomear_materia(self, atual: str, novo: str) -> dict[str, Any] | None:
+        novo = self._validar_nome_materia(novo)
+        with self._conexao() as conexao:
+            tabela_real = next((t for t in self._nomes_tabelas_legacy(conexao) if t.casefold() == str(atual).casefold()), None)
+            if not tabela_real:
+                return None
+            if any(t.casefold() == novo.casefold() and t.casefold() != tabela_real.casefold() for t in self._nomes_tabelas_legacy(conexao)):
+                raise ValueError("Já existe outra matéria com esse nome.")
+            if novo.casefold() == tabela_real.casefold() and novo == tabela_real:
+                return {"nome": tabela_real, "pdfs": 0}
+            tabela_sql = _quote_identifier(tabela_real)
+            colunas = [str(c["name"]) for c in conexao.execute(f"PRAGMA table_info({tabela_sql})").fetchall()]
+            try:
+                registros = conexao.execute(f"SELECT rowid, * FROM {tabela_sql}").fetchall()
+            except sqlite3.Error:
+                registros = []
+            metadados = self._carregar_metadados(conexao)
+            novos_metadados = []
+            total = 0
+            for registro in registros:
+                rowid = int(registro[0])
+                for indice, coluna in enumerate(colunas, start=1):
+                    if self._decodificar_pdf(registro[indice]) is not None:
+                        total += 1
+                    antigo_id = self._id_legacy(tabela_real, rowid, coluna)
+                    meta = metadados.get(antigo_id)
+                    if meta:
+                        novos_metadados.append((self._id_legacy(novo, rowid, coluna), meta["titulo"], meta["nivel"]))
+                        conexao.execute(f"DELETE FROM {TABELA_METADADOS} WHERE material_id = ?", (antigo_id,))
+            conexao.execute(f"ALTER TABLE {tabela_sql} RENAME TO {_quote_identifier(novo)}")
+            for material_id, titulo, nivel in novos_metadados:
+                conexao.execute(f"INSERT OR REPLACE INTO {TABELA_METADADOS} (material_id, titulo, nivel) VALUES (?, ?, ?)", (material_id, titulo, nivel))
+            conexao.execute(f"UPDATE {TABELA_GERENCIADOS} SET materia = ? WHERE materia = ? COLLATE NOCASE", (novo, tabela_real))
+            conexao.commit()
+            return {"nome": novo, "pdfs": total}
+
+    def excluir_materia(self, nome: str, confirmar: bool) -> dict[str, Any] | None:
+        if confirmar is not True:
+            raise ValueError("Confirme explicitamente a exclusão da matéria e de todos os PDFs associados.")
+        with self._conexao() as conexao:
+            tabela_real = next((t for t in self._nomes_tabelas_legacy(conexao) if t.casefold() == str(nome).casefold()), None)
+            if not tabela_real:
+                return None
+            tabela_sql = _quote_identifier(tabela_real)
+            colunas = [str(c["name"]) for c in conexao.execute(f"PRAGMA table_info({tabela_sql})").fetchall()]
+            try:
+                registros = conexao.execute(f"SELECT rowid, * FROM {tabela_sql}").fetchall()
+            except sqlite3.Error:
+                registros = []
+            total = sum(1 for registro in registros for indice, _ in enumerate(colunas, start=1)
+                        if self._decodificar_pdf(registro[indice]) is not None)
+            for registro in registros:
+                rowid = int(registro[0])
+                for coluna in colunas:
+                    conexao.execute(f"DELETE FROM {TABELA_METADADOS} WHERE material_id = ?",
+                                    (self._id_legacy(tabela_real, rowid, coluna),))
+            gerenciados = conexao.execute(
+                f"SELECT COUNT(*) FROM {TABELA_GERENCIADOS} WHERE materia = ? COLLATE NOCASE", (tabela_real,)
+            ).fetchone()[0]
+            total += int(gerenciados)
+            conexao.execute(f"DROP TABLE {tabela_sql}")
+            conexao.execute(f"DELETE FROM {TABELA_GERENCIADOS} WHERE materia = ? COLLATE NOCASE", (tabela_real,))
+            conexao.commit()
+            return {"nome": tabela_real, "pdfs_excluidos": total}
+
     def listar_categorias(self) -> list[str]:
         with self._conexao() as conexao:
             categorias = set(self._nomes_tabelas_legacy(conexao))

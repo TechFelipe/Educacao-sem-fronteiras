@@ -63,7 +63,7 @@ function pedirLogin() {
 }
 
 // Monta o resumo com as métricas retornadas pelo backend.
-function desenharResumo(relatorio) {
+function desenharResumo(relatorio, ranking = {}) {
     const destino = document.getElementById("relatorio");
     if (!destino) return;
     destino.replaceChildren();
@@ -76,7 +76,13 @@ function desenharResumo(relatorio) {
         { titulo: formatarNota(relatorio.total_redacoes), rotulo: "Redações enviadas" },
         { titulo: formatarNota(relatorio.media), rotulo: "Média geral" },
         { titulo: formatarNota(relatorio.melhor_nota), rotulo: "Melhor nota" },
-        { titulo: formatarNota(relatorio.menor_nota), rotulo: "Menor nota" }
+        { titulo: formatarNota(relatorio.menor_nota), rotulo: "Menor nota" },
+        {
+            titulo: ranking.posicao
+                ? `${ranking.posicao}º de ${ranking.total_estudantes}`
+                : "Não classificado",
+            rotulo: "Ranking global"
+        },
     ];
 
     metricas.forEach((metrica) => {
@@ -206,7 +212,7 @@ async function carregarMeuDesempenho() {
         }
 
         const relatorio = dados.relatorio || {};
-        desenharResumo(relatorio);
+        desenharResumo(relatorio, dados.ranking || {});
         desenharEvolucao(dados.evolucao || [], Number(relatorio.total_redacoes) || 0);
         desenharCompetencias(dados.competencias || {});
         status.textContent = "Seu desempenho foi atualizado.";

@@ -1,0 +1,74 @@
+/* Aparência dos botões de gerenciamento de matérias em temas.html */
+.subject-admin-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 12px;
+    margin: 18px 0;
+}
+
+.subject-admin-buttons .materia-action-button {
+    --button-bg: #555;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 48px;
+    padding: 12px 20px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: var(--button-bg);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    letter-spacing: .01em;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .14);
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.subject-admin-buttons .materia-action-button::before {
+    display: inline-block;
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.subject-admin-buttons .materia-action-add { --button-bg: #E6B52D; }
+.subject-admin-buttons .materia-action-add::before { content: "+"; font-size: 1.55rem; font-weight: 500; }
+.subject-admin-buttons .materia-action-rename { --button-bg: #E87524; }
+.subject-admin-buttons .materia-action-rename::before { content: "✎"; }
+.subject-admin-buttons .materia-action-delete { --button-bg: #A83232; }
+.subject-admin-buttons .materia-action-delete::before {
+    content: "";
+    width: 1.15rem;
+    height: 1.15rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M8 6V4h8v2'/%3E%3Cpath d='M19 6v14H5V6'/%3E%3Cpath d='M10 11v6'/%3E%3Cpath d='M14 11v6'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M8 6V4h8v2'/%3E%3Cpath d='M19 6v14H5V6'/%3E%3Cpath d='M10 11v6'/%3E%3Cpath d='M14 11v6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.subject-admin-buttons .materia-action-button:hover {
+    filter: brightness(1.06);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .2);
+}
+
+.subject-admin-buttons .materia-action-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .16);
+}
+
+.subject-admin-buttons .materia-action-button:focus-visible {
+    outline: 3px solid rgba(35, 35, 35, .45);
+    outline-offset: 3px;
+}
+
+.subject-admin-buttons .materia-action-button.is-active {
+    filter: brightness(.9);
+    box-shadow: 0 0 0 3px rgba(40, 40, 40, .16), 0 4px 10px rgba(0, 0, 0, .16);
+}
+
+@media (max-width: 600px) {
+    .subject-admin-buttons { display: grid; grid-template-columns: 1fr; }
+    .subject-admin-buttons .materia-action-button { width: 100%; }
+}

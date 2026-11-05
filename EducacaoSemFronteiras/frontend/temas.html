@@ -7,9 +7,11 @@
     <title>Matérias - Biblioteca digital Estudantil</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/temas.css">
+    <link rel="stylesheet" href="/static/css/gerenciar_materias.css">
     <!-- Carrega o cabeçalho, menu lateral e área de usuário compartilhados pelo site. -->
     <script src="/static/js/common.js" defer></script>
     <script src="/static/js/temas.js" defer></script>
+    <script src="/static/js/gerenciar_materias.js" defer></script>
 </head>
 
 <body>
@@ -33,6 +35,38 @@
         <p id="materias-status" class="materias-status" role="status" aria-live="polite">Selecione uma matéria ou
             pesquise para visualizar os PDFs.</p>
         <section id="resultado-materias" class="materiais-lista" aria-label="Materiais encontrados"></section>
+
+        <!-- Gerenciamento de matérias fica abaixo da área de PDFs. -->
+        <section class="admin-panel subject-admin-panel" aria-labelledby="materias-title">
+            <h2 id="materias-title">Gerenciar matérias</h2>
+            <p>Escolha uma operação. O formulário correspondente aparecerá logo abaixo.</p>
+            <div class="subject-admin-buttons" role="group" aria-label="Ações de gerenciamento de matérias">
+                <button type="button" class="admin-button primary materia-action-button materia-action-add" data-acao-materia="adicionar">Adicionar matéria</button>
+                <button type="button" class="admin-button materia-action-button materia-action-rename" data-acao-materia="renomear">Renomear matéria</button>
+                <button type="button" class="admin-button danger materia-action-button materia-action-delete" data-acao-materia="excluir">Excluir matéria</button>
+            </div>
+            <p id="materias-admin-status" class="admin-status" role="status" aria-live="polite">Entre na sua conta para gerenciar matérias.</p>
+            <div id="painel-acao-materia" class="subject-action-panel" hidden>
+                <form id="form-materia-adicionar" data-painel="adicionar" hidden>
+                    <label for="nova-materia">Nome da nova matéria</label>
+                    <input id="nova-materia" type="text" maxlength="100" required placeholder="Ex.: Física">
+                    <button class="admin-button primary" type="submit">Criar matéria</button>
+                </form>
+                <form id="form-materia-renomear" data-painel="renomear" hidden>
+                    <label for="materia-renomear">Matéria atual</label>
+                    <select id="materia-renomear" required><option value="">Selecione uma matéria</option></select>
+                    <label for="novo-nome-materia">Novo nome</label>
+                    <input id="novo-nome-materia" type="text" maxlength="100" required placeholder="Digite o novo nome">
+                    <button class="admin-button primary" type="submit">Salvar novo nome</button>
+                </form>
+                <form id="form-materia-excluir" data-painel="excluir" hidden>
+                    <label for="materia-excluir">Matéria que deseja excluir</label>
+                    <select id="materia-excluir" required><option value="">Selecione uma matéria</option></select>
+                    <p class="form-help">Se a matéria possuir PDFs, todos serão apagados junto com ela. Você poderá cancelar na confirmação seguinte.</p>
+                    <button class="admin-button danger" type="submit">Continuar para exclusão</button>
+                </form>
+            </div>
+        </section>
     </main>
 
 

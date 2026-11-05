@@ -15,6 +15,11 @@
     const botaoSalvar = document.getElementById("salvar-edicao");
     const botaoSubstituir = document.getElementById("substituir-pdf");
     const botaoCancelar = document.getElementById("cancelar-edicao");
+    const formMateria = document.getElementById("form-materia");
+    const campoNovaMateria = document.getElementById("nova-materia");
+    const listaGerenciarMaterias = document.getElementById("lista-gerenciar-materias");
+    const statusMaterias = document.getElementById("materias-status");
+    const botaoCriarMateria = document.getElementById("criar-materia");
 
     let materiais = [];
     let materialSelecionado = null;
@@ -57,6 +62,7 @@
         botaoSalvar.disabled = !usuarioLogado || !materialSelecionado;
         botaoSubstituir.disabled = !usuarioLogado || !materialSelecionado;
         botaoCancelar.disabled = !materialSelecionado;
+        if (botaoCriarMateria) botaoCriarMateria.disabled = !usuarioLogado;
     }
 
     function limparFormulario() {
@@ -162,6 +168,103 @@
         }
     }
 
+    function mostrarStatusMaterias(mensagem, erro = false) {
+        statusMaterias.textContent = mensagem;
+        statusMaterias.classList.toggle("status-error", erro);
+    }
+
+    async function carregarMateriasGerenciamento() {
+        try {
+            const materias = await respostaApi("/api/materias/categorias/gerenciar");
+            listaGerenciarMaterias.replaceChildren();
+            materias.forEach((materia) => {
+                const item = document.createElement("article");
+                item.className = "subject-management-item";
+                const informacao = document.createElement("div");
+                const nome = document.createElement("strong");
+                nome.textContent = materia.nome;
+                const quantidade = document.createElement("span");
+                quantidade.textContent = `${materia.pdfs} PDF(s)`;
+                informacao.append(nome, quantidade);
+                const acoes = document.createElement("div");
+                acoes.className = "subject-management-actions";
+                acoes.append(
+                    criarBotao("Renomear", "edit", () => renomearMateria(materia), !usuarioLogado),
+                    criarBotao("Excluir", "delete", () => excluirMateriaCompleta(materia), !usuarioLogado)
+                );
+                item.append(informacao, acoes);
+                listaGerenciarMaterias.append(item);
+            });
+            mostrarStatusMaterias(`${materias.length} matéria(s) cadastrada(s).`);
+        } catch (erro) {
+            mostrarStatusMaterias(erro.message, true);
+        }
+    }
+
+    async function renomearMateria(materia) {
+        const novo = window.prompt(`Digite o novo nome para “${materia.nome}”:`, materia.nome);
+        if (novo === null) return;
+        if (!novo.trim()) {
+            mostrarStatusMaterias("O nome da matéria não pode ficar vazio.", true);
+            return;
+        }
+        try {
+            const retorno = await respostaApi("/api/materias/categorias/gerenciar", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ atual: materia.nome, novo: novo.trim() })
+            });
+            mostrarStatusMaterias(retorno.mensagem || "Matéria renomeada.");
+            await Promise.all([carregarMateriasGerenciamento(), carregarCategorias(), carregarMateriais()]);
+        } catch (erro) {
+            mostrarStatusMaterias(erro.message, true);
+        }
+    }
+
+    async function excluirMateriaCompleta(materia) {
+        const aviso = materia.pdfs > 0
+            ? `A matéria “${materia.nome}” possui ${materia.pdfs} PDF(s).
+
+Se continuar, TODOS esses PDFs também serão apagados. Essa ação não pode ser desfeita.
+
+Deseja realmente excluir a matéria e seus PDFs?`
+            : `Deseja realmente excluir a matéria “${materia.nome}”? Essa ação não pode ser desfeita.`;
+        if (!window.confirm(aviso)) return;
+        try {
+            const retorno = await respostaApi("/api/materias/categorias/gerenciar", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nome: materia.nome, confirmar: true })
+            });
+            if (materialSelecionado?.materia === materia.nome) limparFormulario();
+            mostrarStatusMaterias(retorno.mensagem || "Matéria excluída.");
+            mostrarStatus(retorno.mensagem || "Matéria excluída.");
+            await Promise.all([carregarMateriasGerenciamento(), carregarCategorias(), carregarMateriais()]);
+        } catch (erro) {
+            mostrarStatusMaterias(erro.message, true);
+        }
+    }
+
+    if (formMateria) formMateria.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        if (!usuarioLogado) {
+            mostrarStatusMaterias("Entre na sua conta para gerenciar matérias.", true);
+            return;
+        }
+        try {
+            const retorno = await respostaApi("/api/materias/categorias/gerenciar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nome: campoNovaMateria.value.trim() })
+            });
+            campoNovaMateria.value = "";
+            mostrarStatusMaterias(retorno.mensagem || "Matéria criada.");
+            await Promise.all([carregarMateriasGerenciamento(), carregarCategorias()]);
+        } catch (erro) {
+            mostrarStatusMaterias(erro.message, true);
+        }
+    });
+
     async function carregarCategorias() {
         try {
             const categorias = await respostaApi("/api/materias/categorias");
@@ -253,6 +356,7 @@
     async function iniciar() {
         await verificarUsuario();
         await Promise.all([carregarCategorias(), carregarMateriais()]);
+        if (formMateria) await carregarMateriasGerenciamento();
     }
     iniciar();
 })();

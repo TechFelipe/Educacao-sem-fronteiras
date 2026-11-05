@@ -4,18 +4,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking - Biblioteca digital Estudantil</title>
+    <title>Ranking global - Educação sem Fronteiras</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/ranking.css">
     <script src="/static/js/common.js" defer></script>
     <script src="/static/js/ranking.js" defer></script>
 </head>
 
 <body>
     <iframe class="header-frame" src="/cabecalho" title="Cabeçalho e navegação" scrolling="no" loading="eager"></iframe>
-    <main>
-        <section class="page">
+
+    <main class="ranking-page">
+        <section class="ranking-heading">
             <h1>Ranking</h1>
-            <div id="ranking" class="ranking-list"></div>
+            <p>Acompanhe a classificação geral dos estudantes de acordo com o desempenho nas redações.</p>
+            <div class="ranking-rules">
+                <span><strong>1º critério:</strong> maior média das notas</span>
+                <span><strong>Desempate:</strong> maior número de redações enviadas</span>
+            </div>
+        </section>
+
+        <section class="ranking-overview" aria-label="Resumo do ranking">
+            <div class="overview-icon" aria-hidden="true">🏆</div>
+            <div>
+                <strong id="ranking-total">—</strong>
+                <span>estudantes classificados</span>
+            </div>
+            <span class="overview-caption">Classificação atualizada automaticamente</span>
+        </section>
+
+        <section id="ranking-status" class="ranking-status" aria-live="polite">
+            Carregando ranking...
+        </section>
+
+        <section class="ranking-global-section" aria-labelledby="ranking-list-title">
+            <div class="ranking-list-heading">
+                <div>
+                    <span class="ranking-section-label">CLASSIFICAÇÃO</span>
+                    <h2 id="ranking-list-title">Todos os estudantes</h2>
+                </div>
+                <span class="ranking-order">Maior média primeiro</span>
+            </div>
+            <div id="ranking-list" class="ranking-list" aria-live="polite"></div>
         </section>
     </main>
 </body>

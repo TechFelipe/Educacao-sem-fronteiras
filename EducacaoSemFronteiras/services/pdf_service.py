@@ -18,6 +18,24 @@ class PdfService:
     def __init__(self, repository: PdfRepository | None = None):
         self.repository = repository or PdfRepository()
 
+    def listar_materias_administracao(self):
+        return self.repository.listar_materias_administracao()
+
+    def criar_materia(self, dados):
+        if not isinstance(dados, dict):
+            raise ValueError("Informe os dados da matéria.")
+        return self.repository.criar_materia(dados.get("nome", ""))
+
+    def renomear_materia(self, dados):
+        if not isinstance(dados, dict) or not dados.get("atual"):
+            raise ValueError("Selecione a matéria que deseja renomear.")
+        return self.repository.renomear_materia(dados.get("atual"), dados.get("novo", ""))
+
+    def excluir_materia(self, dados):
+        if not isinstance(dados, dict) or not dados.get("nome"):
+            raise ValueError("Selecione a matéria que deseja excluir.")
+        return self.repository.excluir_materia(dados.get("nome"), dados.get("confirmar") is True)
+
     def listar_categorias(self):
         return [{"nome": nome} for nome in self.repository.listar_categorias()]
 

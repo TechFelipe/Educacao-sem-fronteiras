@@ -23,6 +23,57 @@ class MateriasCategoriasController(MethodView):
             return jsonify({"erro": "Não foi possível listar as matérias."}), 500
 
 
+class GerenciarMateriasController(MethodView):
+    def get(self):
+        bloqueio = _exigir_login()
+        if bloqueio:
+            return bloqueio
+        try:
+            return jsonify(PdfService().listar_materias_administracao()), 200
+        except Exception:
+            return jsonify({"sucesso": False, "erro": "Não foi possível listar as matérias."}), 500
+
+    def post(self):
+        bloqueio = _exigir_login()
+        if bloqueio:
+            return bloqueio
+        try:
+            materia = PdfService().criar_materia(request.get_json(silent=True) or {})
+            return jsonify({"sucesso": True, "mensagem": "Matéria criada com sucesso.", "materia": materia}), 201
+        except ValueError as erro:
+            return jsonify({"sucesso": False, "erro": str(erro)}), 400
+        except Exception:
+            return jsonify({"sucesso": False, "erro": "Erro ao criar a matéria."}), 500
+
+    def patch(self):
+        bloqueio = _exigir_login()
+        if bloqueio:
+            return bloqueio
+        try:
+            materia = PdfService().renomear_materia(request.get_json(silent=True) or {})
+            if not materia:
+                return jsonify({"sucesso": False, "erro": "Matéria não encontrada."}), 404
+            return jsonify({"sucesso": True, "mensagem": "Matéria renomeada; os PDFs foram preservados.", "materia": materia}), 200
+        except ValueError as erro:
+            return jsonify({"sucesso": False, "erro": str(erro)}), 400
+        except Exception:
+            return jsonify({"sucesso": False, "erro": "Erro ao renomear a matéria."}), 500
+
+    def delete(self):
+        bloqueio = _exigir_login()
+        if bloqueio:
+            return bloqueio
+        try:
+            materia = PdfService().excluir_materia(request.get_json(silent=True) or {})
+            if not materia:
+                return jsonify({"sucesso": False, "erro": "Matéria não encontrada."}), 404
+            return jsonify({"sucesso": True, "mensagem": f"Matéria excluída. {materia['pdfs_excluidos']} PDF(s) também foram apagados.", "materia": materia}), 200
+        except ValueError as erro:
+            return jsonify({"sucesso": False, "erro": str(erro)}), 400
+        except Exception:
+            return jsonify({"sucesso": False, "erro": "Erro ao excluir a matéria."}), 500
+
+
 class MateriaisController(MethodView):
     def get(self):
         try:
@@ -109,6 +160,7 @@ class MaterialArquivoController(MethodView):
 
 
 pdf_bp.add_url_rule("/categorias", view_func=MateriasCategoriasController.as_view("categorias"), methods=["GET"])
+pdf_bp.add_url_rule("/categorias/gerenciar", view_func=GerenciarMateriasController.as_view("gerenciar_categorias"), methods=["GET", "POST", "PATCH", "DELETE"])
 pdf_bp.add_url_rule("", view_func=MateriaisController.as_view("colecao"), methods=["GET", "POST"])
 pdf_bp.add_url_rule("/<material_id>", view_func=MaterialDetalheController.as_view("detalhe"), methods=["PATCH", "DELETE"])
 pdf_bp.add_url_rule("/<material_id>/pdf", view_func=MaterialArquivoController.as_view("arquivo"), methods=["GET", "PUT"])

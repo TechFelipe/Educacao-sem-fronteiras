@@ -36,3 +36,27 @@
 }
 
 .admin-status.status-error { border-color: #a32629; background: #fff0f0; color: #7e1c20; }
+
+/* Administração de matérias */
+.subject-form { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.subject-form label { display: flex; flex: 1 1 260px; flex-direction: column; gap: 7px; font-weight: 700; }
+.subject-form input { min-height: 42px; padding: 9px 11px; border: 1px solid #aaa; border-radius: 7px; font: inherit; }
+.subject-management-list { display: grid; gap: 10px; }
+.subject-management-item { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 13px 15px; border: 1px solid #ddd; border-radius: 9px; background: #fff; }
+.subject-management-item > div:first-child { display: grid; gap: 4px; }
+.subject-management-item span { color: #555; font-size: 14px; }
+.subject-management-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 520px) { .subject-form { align-items: stretch; flex-direction: column; } }
+
+/* Ações de gerenciamento de matérias posicionadas abaixo da área de PDFs. */
+.subject-admin-panel { margin-top: 34px; }
+.subject-admin-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+.subject-admin-buttons .admin-button.is-active { outline: 3px solid #f4c28e; outline-offset: 2px; }
+.admin-button.danger { border-color: #a32629; background: #a32629; color: #fff; }
+.subject-action-panel { margin-top: 16px; padding: 18px; border: 1px solid #e2e2e2; border-radius: 10px; background: #fafafa; }
+.subject-action-panel form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; max-width: 560px; }
+.subject-action-panel label { font-weight: 700; }
+.subject-action-panel input, .subject-action-panel select { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #aaa; border-radius: 7px; background: #fff; font: inherit; }
+.subject-action-panel button { justify-self: start; margin-top: 6px; }
+.subject-action-panel[hidden], .subject-action-panel form[hidden] { display: none !important; }
+@media (max-width: 600px) { .subject-admin-buttons { flex-direction: column; } .subject-admin-buttons .admin-button { width: 100%; } }

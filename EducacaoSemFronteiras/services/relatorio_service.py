@@ -1,5 +1,6 @@
 """Validação dos identificadores e coordenação dos relatórios do aluno."""
 from repositories.relatorio_repository import RelatorioRepository
+from repositories.redacao_repository import RedacaoRepository
 
 class RelatorioService:
     def __init__(self):
@@ -29,8 +30,22 @@ class RelatorioService:
         navegador. Os métodos chamados continuam delegando a persistência ao Repository.
         """
         usuario_id = self.validar_id(usuario_id)
+        relatorio = self.relatorio(usuario_id)
+
+        # Usa exatamente a mesma ordenação da página de ranking global.
+        classificacao = RedacaoRepository().ranking()
+        posicao = next(
+            (indice + 1 for indice, estudante in enumerate(classificacao)
+             if int(estudante["id"]) == usuario_id),
+            None
+        )
+
         return {
-            "relatorio": self.relatorio(usuario_id),
+            "relatorio": relatorio,
             "evolucao": self.evolucao(usuario_id),
             "competencias": self.competencia_fraca(usuario_id),
+            "ranking": {
+                "posicao": posicao,
+                "total_estudantes": len(classificacao),
+            },
         }
